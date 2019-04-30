@@ -14,7 +14,7 @@ var dbr *sql.DB
 
 func init()  {
 	var err error
-	dbr, err = sql.Open("mysql", "root:hello123@tcp(127.0.0.1:3306)/test")
+	dbr, err = sql.Open("mysql", "root:******@tcp(127.0.0.1:3306)/test")
 	common.FailOnError(err,"")
 	dbr.SetMaxOpenConns(2000)
 	dbr.SetMaxIdleConns(1000)
