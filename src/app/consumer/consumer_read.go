@@ -2,8 +2,10 @@ package main
 
 import (
 	"app/common"
+	"app/config"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
@@ -14,7 +16,7 @@ var dbr *sql.DB
 
 func init()  {
 	var err error
-	dbr, err = sql.Open("mysql", "root:hello123@tcp(127.0.0.1:3306)/test")
+	dbr, err = sql.Open("mysql", config.MysqlDataSource)
 	common.FailOnError(err,"")
 	dbr.SetMaxOpenConns(2000)
 	dbr.SetMaxIdleConns(1000)
@@ -23,7 +25,7 @@ func init()  {
 }
 
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(config.AmqpUrl)
 	common.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -102,8 +104,10 @@ func main() {
 
 			index := common.GetHaseValue(int(read["uid"].(float64)))
 			table := "notice_" + strconv.Itoa(index)
+			strType := common.NoticeType(int(read["type"].(float64)))
 
-			smtp,err := dbr.Prepare("update "+table+" set status=1 where uid=? and type in (?) and status=0")
+			rowsql := fmt.Sprintf("update %s set status=1 where uid=? and type in (%s) and status=0",table,strType)
+			smtp,err := dbr.Prepare(rowsql)
 			if err != nil {
 				log.Println(err)
 				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
@@ -114,8 +118,7 @@ func main() {
 				continue
 			}
 
-			strType := common.NoticeType(int(read["type"].(float64)))
-			result,err := smtp.Exec(read["uid"],strType)
+			result,err := smtp.Exec(read["uid"])
 			if err != nil {
 				log.Println(err)
 				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){

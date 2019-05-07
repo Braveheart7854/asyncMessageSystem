@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"os"
 	"reflect"
 )
 
@@ -113,4 +114,21 @@ func NoticeType(typ int)string{
 	default:
 		return "0"
 	}
+}
+
+
+func Log(file string,content string){
+	//写入文件
+	file6, _ := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766);
+
+	loger := log.New(file6, "前缀", log.Ldate|log.Ltime|log.Lshortfile)
+
+	//SetFlags设置输出选项
+	loger.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	//设置输出前缀
+	loger.SetPrefix("test_")
+
+	loger.Output(2, content)
+
+	file6.Close()
 }

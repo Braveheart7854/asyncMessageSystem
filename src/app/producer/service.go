@@ -1,6 +1,7 @@
 package producer
 
 import (
+	"app/config"
 	"encoding/json"
 	"github.com/streadway/amqp"
 	"log"
@@ -37,7 +38,7 @@ func failOnError(err error, msg string) {
 //}
 
 func (S *Service) PutIntoQueue(exchangeName string, routeKey string, notice notice) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(config.AmqpUrl)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -75,6 +76,6 @@ func (S *Service) PutIntoQueue(exchangeName string, routeKey string, notice noti
 
 	failOnError(err, "Failed to publish a message")
 
-	log.Printf(" [x] Sent %s", data)
+	log.Printf(" [%s] Sent %s", routeKey,data)
 
 }

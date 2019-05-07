@@ -1,6 +1,7 @@
 package main
 
 import (
+	"app/config"
 	"app/producer"
 	"github.com/kataras/iris"
 )
@@ -17,5 +18,5 @@ func main() {
 	//	handler.Notify(context,channel)
 	//})
 
-	app.Run(iris.Addr("localhost:3333"))
+	app.Run(iris.Addr(config.ServerAddr + ":3333"))
 }

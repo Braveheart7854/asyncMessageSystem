@@ -36,6 +36,8 @@ type ReturnJson struct {
 }
 
 func (P *Produce) Notify(ctx iris.Context)  {
+	//common.Log("./log3.txt","test")
+
 	defer func() {
 		msg := recover()
 		if msg != nil {
@@ -56,8 +58,10 @@ func (P *Produce) Notify(ctx iris.Context)  {
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
 
+	//common.Log("./log1.txt",data)
 	QueueService := new(Service)
 	QueueService.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
+	//common.Log("./log2.txt",data)
 
 	//log.Printf("%d %d %s",uid,n_type,data)
 	ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})
