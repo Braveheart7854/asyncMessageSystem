@@ -139,14 +139,15 @@ func main() {
 				}
 				continue
 			}else{
-				smtpuser,_ := dbr.Prepare("update users set notification_count=notification_count-? where id=? and notification_count>=?")
-				res,_ := smtpuser.Exec(rowCount,read["uid"],rowCount)
+				smtpuserI,_ := dbr.Prepare("update users set notification_count=notification_count-? where id=? and notification_count>=?")
+				res,_ := smtpuserI.Exec(rowCount,read["uid"],rowCount)
 				affect,_ := res.RowsAffected()
+				smtpuserI.Close()
 				if common.IsEmpty(affect) {
 					smtpuser,_ := dbr.Prepare("update users set notification_count=0 where id=?")
 					_,_ = smtpuser.Exec(read["uid"])
+					smtpuser.Close()
 				}
-				smtpuser.Close()
 			}
 			d.Ack(false)
 			smtp.Close()
