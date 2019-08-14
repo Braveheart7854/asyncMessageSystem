@@ -1,26 +1,27 @@
 package main
 
 import (
-	"app/common"
-	"app/config"
+	"wxforum_server/app/common"
+	"wxforum_server/app/config"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
 	"strconv"
 )
 
-var db *sql.DB
+var dbr *sql.DB
 
 func init()  {
 	var err error
-	db, err = sql.Open("mysql", config.MysqlDataSource)
+	dbr, err = sql.Open("mysql", config.MysqlDataSource)
 	common.FailOnError(err,"")
-	db.SetMaxOpenConns(2000)
-	db.SetMaxIdleConns(1000)
-	//db.SetConnMaxLifetime(3)
-	db.Ping()
+	dbr.SetMaxOpenConns(2000)
+	dbr.SetMaxIdleConns(1000)
+	dbr.SetConnMaxLifetime(9)
+	dbr.Ping()
 }
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 	defer ch.Close()
 
 	err = ch.ExchangeDeclare(
-		common.ExchangeNameNotice, // name
+		common.ExchangeNameRead, // name
 		"topic",      // type
 		true,         // durable
 		false,        // auto-deleted
@@ -44,7 +45,7 @@ func main() {
 	common.FailOnError(err, "Failed to declare an exchange")
 
 	q, err := ch.QueueDeclare(
-		common.QueueNameNotice,    // name
+		common.QueueNameRead,    // name
 		true, // durable
 		false, // delete when unusedt.msg.ext.msg.ext.msg.ext.msg.ex
 		false,  // exclusive
@@ -59,13 +60,13 @@ func main() {
 	//}
 	//for _, s := range os.Args[1:] {
 	//	log.Printf("Binding queue %s to exchange %s with routing key %s", q.Name, "logs_topic", s)
-		err = ch.QueueBind(
-			q.Name,       // queue name
-			common.RouteKeyNotice,            // routing key
-			common.ExchangeNameNotice, // exchange
-			false,
-			nil)
-		common.FailOnError(err, "Failed to bind a queue")
+	err = ch.QueueBind(
+		q.Name,       // queue name
+		common.RouteKeyRead,            // routing key
+		common.ExchangeNameRead, // exchange
+		false,
+		nil)
+	common.FailOnError(err, "Failed to bind a queue")
 	//}
 
 	msgs, err := ch.Consume(
@@ -84,16 +85,16 @@ func main() {
 	go func() {
 		for d := range msgs {
 
-			orderSn := common.MD5(string(d.Body)+"notify")
+			orderSn := common.MD5(string(d.Body) + "read")
 			//log.Printf(" [x] %s", orderSn)
 			//log.Printf(" [x] %s", d.Body)
 
-			var notice map[string] interface{}
-			err := json.Unmarshal([]byte(d.Body),&notice)
+			var read map[string] interface{}
+			err := json.Unmarshal([]byte(d.Body),&read)
 
 			if err != nil{
 				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
+				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
@@ -101,51 +102,69 @@ func main() {
 				continue
 			}
 
-			index := common.GetHaseValue(int(notice["uid"].(float64)))
+			index := common.GetHaseValue(int(read["uid"].(float64)))
 			table := "notice_" + strconv.Itoa(index)
+			strType := common.NoticeType(int(read["type"].(float64)))
 
-			var id int
-			_ = db.QueryRow("select id from "+table+" where order_sn = ?", orderSn).Scan(&id)
-			if id > 0 {
-				d.Ack(false)
-				continue
-			}
-
-			smtp,err := db.Prepare("insert into "+table+" (order_sn,uid,type,data,create_time) values (?,?,?,?,?)")
+			rowsql := fmt.Sprintf("update %s set status=1 where uid=? and type in (%s) and status=0",table,strType)
+			smtp,err := dbr.Prepare(rowsql)
 			if err != nil {
 				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
+				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
 				}
 				continue
 			}
-			result,err := smtp.Exec(orderSn,notice["uid"],notice["type"],notice["data"],notice["createTime"])
+
+			result,err := smtp.Exec(read["uid"])
 			if err != nil {
 				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
+				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
 				}
 				continue
 			}
-			lastId,err := result.LastInsertId()
-			if common.IsEmpty(lastId) || err != nil {
+			rowCount,err := result.RowsAffected()
+			if common.IsEmpty(rowCount) && err != nil {
 
 				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
+				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
 				}
 				continue
 			}else{
-				smtpuser,_ := db.Prepare("update users set notification_count=notification_count+1 where id=?")
-				res,_ := smtpuser.Exec(notice["uid"])
-				_,_ = res.RowsAffected()
-				smtpuser.Close()
+				smtpuserI,err := dbr.Prepare("update users set notification_count=notification_count-? where id=? and notification_count>=?")
+				if err != nil {
+					//log.Println(44444)
+					log.Println(err)
+				}
+				res,err := smtpuserI.Exec(rowCount,read["uid"],rowCount)
+				if err != nil {
+					//log.Println(11111)
+					log.Println(err)
+				}
+				affect,_ := res.RowsAffected()
+				smtpuserI.Close()
+
+				if common.IsEmpty(affect) {
+					smtpuser,err := dbr.Prepare("update users set notification_count=0 where id=?")
+					if err != nil {
+						//log.Println(22222)
+						log.Println(err)
+					}
+					_,err = smtpuser.Exec(read["uid"])
+					if err != nil {
+						//log.Println(33333)
+						log.Println(err)
+					}
+					smtpuser.Close()
+				}
 			}
 			d.Ack(false)
 			smtp.Close()

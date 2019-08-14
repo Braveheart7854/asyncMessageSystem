@@ -1,15 +1,15 @@
 package producer
 
 import (
-	"app/common"
+	"fmt"
+	"github.com/Braveheart7854/rabbitmqPool"
 	"github.com/kataras/iris"
 	"log"
 	"time"
+	"wxforum_server/app/common"
 )
 
-type Produce struct {
-	//MqInstance amqp.Channel
-}
+type Produce struct {}
 
 type Producer interface {
 	Notify(ctx iris.Context)
@@ -22,7 +22,7 @@ type Producer interface {
 //	ROUTE_NOTICE    = "route_wxforum_notice"
 //)
 
-type notice struct {
+type Notice struct {
 	Uid int `json:"uid"`
 	Type int `json:"type"`
 	Data string `json:"data"`
@@ -52,19 +52,19 @@ func (P *Produce) Notify(ctx iris.Context)  {
 	data   := ctx.PostValueDefault("data","")
 	createTime   := ctx.PostValueDefault("time",time.Now().Format("2006-01-02 15:04:05"))
 
-	var noticeData notice
+	var noticeData Notice
 	noticeData.Uid = uid
 	noticeData.Type = n_type
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
 
 	//common.Log("./log1.txt",data)
-	QueueService := new(Service)
-	QueueService.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
+	go rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
 	//common.Log("./log2.txt",data)
 
 	//log.Printf("%d %d %s",uid,n_type,data)
 	ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})
+	return
 }
 
 func (P *Produce) Read(ctx iris.Context) {
@@ -82,15 +82,40 @@ func (P *Produce) Read(ctx iris.Context) {
 	data   := ctx.PostValueDefault("data","")
 	createTime   := ctx.PostValueDefault("time",time.Now().Format("2006-01-02 15:04:05"))
 
-	var noticeData notice
+	var noticeData Notice
 	noticeData.Uid = uid
 	noticeData.Type = n_type
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
 
-	QueueService := new(Service)
-	QueueService.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
+	go rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
 
 	//log.Printf("%d %d %s",uid,n_type,data)
 	ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})
+	return
+}
+
+type quizzes struct {
+	Qeid       int    `json:"qeid"`
+	CreateTime string `json:"createTime"`
+}
+func (P * Produce) QuizzesPrize(ctx iris.Context){
+	qeid    := ctx.PostValueIntDefault("qeid",0)
+	createTime   := ctx.PostValueDefault("time",time.Now().Format(common.LAYOUT_STYLE))
+
+	var data quizzes
+	data.Qeid = qeid
+	data.CreateTime = createTime
+
+	//QueueService := new(Service)
+	_,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameQuizzesEvent,common.RouteKeyQuizzesEvent,data)
+	if err != nil {
+		fmt.Println(err)
+		common.Logger.Notice(data)
+		ctx.JSON(ReturnJson{Code:common.FAILED,Msg:"failed",Data: map[string]interface{}{"qeid":qeid,"data":data}})
+		return
+	}
+	//log.Printf("%d %d %s",uid,n_type,data)
+	ctx.JSON(ReturnJson{Code:common.SUCCESS,Msg:"success",Data: map[string]interface{}{"qeid":qeid,"data":data}})
+	return
 }

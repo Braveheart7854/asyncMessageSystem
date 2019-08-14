@@ -4,10 +4,12 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"os"
 	"reflect"
+	"sort"
 )
 
 
@@ -19,6 +21,10 @@ const (
 	ExchangeNameRead = "exchange_wxforum_read"
 	RouteKeyRead     = "route_wxforum_read"
 	QueueNameRead    = "queue_wxforum_read"
+
+	ExchangeNameQuizzesEvent = "exchange_wxforum_quizzes_event"
+	RouteKeyQuizzesEvent     = "route_wxforum_quizzes_event"
+	QueueNameQuizzesEvent    = "queue_wxforum_quizzes_event"
 
 	TypeTopicLiked   = 1
 	TypeReplyLiked   = 2
@@ -36,6 +42,15 @@ const (
     TYPE_REPLY     = 2   //回复
     TYPE_FOCUS     = 3   //关注
     TYPE_SYSTEM    = 4   //系统
+
+    LAYOUT_STYLE     = "2006-01-02 15:04:05"
+    LAYOUT_STYLE_ONE = "01/02 15:04:05"
+    LAYOUT_DATE      = "2006-01-02"
+	LAYOUT_DATE_ONE  = "2006/01/02"
+	LAYOUT_TIME      = "15:04:05"
+
+	SUCCESS = 10000
+	FAILED  = 10001
 )
 
 func IsEmpty(a interface{}) bool {
@@ -110,7 +125,7 @@ func NoticeType(typ int)string{
 	case TYPE_FOCUS:
 		return "4"
 	case TYPE_SYSTEM:
-		return "5,6,7,8,9,10"
+		return "5,6,7,8,9,10,11"
 	default:
 		return "0"
 	}
@@ -131,4 +146,19 @@ func Log(file string,content string){
 	loger.Output(2, content)
 
 	file6.Close()
+}
+
+func SortMap(mp map[string][]interface{})(list map[string][]interface{}) {
+	var newMp = make([]string, 0)
+	for k, _ := range mp {
+		newMp = append(newMp, k)
+	}
+	//sort.Strings(newMp)
+	sort.Sort(sort.Reverse(sort.StringSlice(newMp)))
+	list = make(map[string][]interface{})
+	for _, v := range newMp {
+		list[v] = mp[v]
+		fmt.Println("根据key排序后的新集合》》   key:", v, "    value:", mp[v])
+	}
+	return
 }
