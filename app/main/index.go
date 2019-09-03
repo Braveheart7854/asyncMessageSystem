@@ -4,12 +4,9 @@ import (
 	"github.com/Braveheart7854/rabbitmqPool"
 	"github.com/kataras/iris"
 	"log"
-	"wxforum_server/app/config"
-	"wxforum_server/app/producer"
-)
-
-const(
-	debug = true
+	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/producer"
+	"runtime/debug"
 )
 
 func main() {
@@ -25,30 +22,26 @@ func main() {
 
 	handler := new(producer.Produce)
 
-	//conn, err := amqp.Dial(config.AmqpUrl)
-	//common.FailOnError(err, "Failed to connect to RabbitMQ")
-	//defer conn.Close()
-	//handler.MqInstance = conn
-
+	app.Use(before)
 	app.Post("/product", handler.Notify)
 	app.Post("/read", handler.Read)
-	app.Post("/quizzes/prize", before, handler.QuizzesPrize)
-
-	//channel := handler.ConnectMq()
-	//app.Post("/product", func(context iris.Context) {
-	//	handler.Notify(context,channel)
-	//})
 
 	app.Run(iris.Addr(config.ServerAddr + ":3333"))
 }
 
 func before(ctx iris.Context) {
 	defer func() {
-		if !debug {
-			msg := recover()
-			if msg != nil {
-				log.Printf("%s",msg)
-				ctx.JSON(producer.ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
+		msg := recover()
+		if msg != nil {
+			err := debug.Stack()
+			log.Println(msg, "["+string(err)+"]")
+			if !config.Debug {
+				ctx.JSON(producer.ReturnJson{Code: 10001, Msg: "System is busy now!", Data: map[string]interface{}{}})
+				return
+			}else{
+				strmsg := msg.(string)+"\r\n"
+				bytemsg := []byte(strmsg)
+				ctx.Write(append(bytemsg,err...))
 				return
 			}
 		}

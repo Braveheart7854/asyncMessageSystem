@@ -1,12 +1,10 @@
 package producer
 
 import (
-	"fmt"
+	"asyncMessageSystem/app/common"
 	"github.com/Braveheart7854/rabbitmqPool"
 	"github.com/kataras/iris"
-	"log"
 	"time"
-	"wxforum_server/app/common"
 )
 
 type Produce struct {}
@@ -38,14 +36,14 @@ type ReturnJson struct {
 func (P *Produce) Notify(ctx iris.Context)  {
 	//common.Log("./log3.txt","test")
 
-	defer func() {
-		msg := recover()
-		if msg != nil {
-			log.Printf("%s",msg)
-			ctx.JSON(ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
-			return
-		}
-	}()
+	//defer func() {
+	//	msg := recover()
+	//	if msg != nil {
+	//		log.Printf("%s",msg)
+	//		ctx.JSON(ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
+	//		return
+	//	}
+	//}()
 
 	uid    := ctx.PostValueIntDefault("uid",0)
 	n_type := ctx.PostValueIntDefault("type",0)
@@ -68,14 +66,14 @@ func (P *Produce) Notify(ctx iris.Context)  {
 }
 
 func (P *Produce) Read(ctx iris.Context) {
-	defer func() {
-		msg := recover()
-		if msg != nil {
-			log.Printf("%s",msg)
-			ctx.JSON(ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
-			return
-		}
-	}()
+	//defer func() {
+	//	msg := recover()
+	//	if msg != nil {
+	//		log.Printf("%s",msg)
+	//		ctx.JSON(ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
+	//		return
+	//	}
+	//}()
 
 	uid    := ctx.PostValueIntDefault("uid",0)
 	n_type := ctx.PostValueIntDefault("type",common.TYPE_LIKE)
@@ -92,30 +90,5 @@ func (P *Produce) Read(ctx iris.Context) {
 
 	//log.Printf("%d %d %s",uid,n_type,data)
 	ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})
-	return
-}
-
-type quizzes struct {
-	Qeid       int    `json:"qeid"`
-	CreateTime string `json:"createTime"`
-}
-func (P * Produce) QuizzesPrize(ctx iris.Context){
-	qeid    := ctx.PostValueIntDefault("qeid",0)
-	createTime   := ctx.PostValueDefault("time",time.Now().Format(common.LAYOUT_STYLE))
-
-	var data quizzes
-	data.Qeid = qeid
-	data.CreateTime = createTime
-
-	//QueueService := new(Service)
-	_,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameQuizzesEvent,common.RouteKeyQuizzesEvent,data)
-	if err != nil {
-		fmt.Println(err)
-		common.Logger.Notice(data)
-		ctx.JSON(ReturnJson{Code:common.FAILED,Msg:"failed",Data: map[string]interface{}{"qeid":qeid,"data":data}})
-		return
-	}
-	//log.Printf("%d %d %s",uid,n_type,data)
-	ctx.JSON(ReturnJson{Code:common.SUCCESS,Msg:"success",Data: map[string]interface{}{"qeid":qeid,"data":data}})
 	return
 }

@@ -1,6 +1,8 @@
 package config
 
 const (
+	Debug = true
+
 	ServerAddr = "localhost" //开发机、测试机
 
 	//开发机

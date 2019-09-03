@@ -1,8 +1,8 @@
 package main
 
 import (
-	"wxforum_server/app/common"
-	"wxforum_server/app/config"
+	"asyncMessageSystem/app/common"
+	"asyncMessageSystem/app/config"
 	"database/sql"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"

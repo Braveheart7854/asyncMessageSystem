@@ -1,4 +1,4 @@
-module wxforum_server
+module asyncMessageSystem
 
 go 1.12
 
