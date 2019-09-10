@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package notice;
+
+// The greeting service definition.
+service Producer {
+  // Sends a greeting
+  rpc Notify (NoticeRequest) returns (ProducerResponse) {}
+  rpc Read (NoticeRequest) returns (ProducerResponse) {}
+}
+
+
+// The request message containing the user's name.
+message NoticeRequest {
+  int64 uid  = 1;
+  int64 type = 2;
+  string data = 3;
+  string createTime = 4;
+}
+
+// The response message containing the greetings
+message ProducerResponse {
+  int64 code = 1;
+  string msg = 2;
+  bytes data = 3;
+}

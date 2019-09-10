@@ -21,8 +21,8 @@ type Producer interface {
 //)
 
 type Notice struct {
-	Uid int `json:"uid"`
-	Type int `json:"type"`
+	Uid int64 `json:"uid"`
+	Type int64 `json:"type"`
 	Data string `json:"data"`
 	CreateTime string `json:"createTime"`
 }
@@ -45,8 +45,8 @@ func (P *Produce) Notify(ctx iris.Context)  {
 	//	}
 	//}()
 
-	uid    := ctx.PostValueIntDefault("uid",0)
-	n_type := ctx.PostValueIntDefault("type",0)
+	uid    := ctx.PostValueInt64Default("uid",0)
+	n_type := ctx.PostValueInt64Default("type",0)
 	data   := ctx.PostValueDefault("data","")
 	createTime   := ctx.PostValueDefault("time",time.Now().Format("2006-01-02 15:04:05"))
 
@@ -75,8 +75,8 @@ func (P *Produce) Read(ctx iris.Context) {
 	//	}
 	//}()
 
-	uid    := ctx.PostValueIntDefault("uid",0)
-	n_type := ctx.PostValueIntDefault("type",common.TYPE_LIKE)
+	uid    := ctx.PostValueInt64Default("uid",0)
+	n_type := ctx.PostValueInt64Default("type",common.TYPE_LIKE)
 	data   := ctx.PostValueDefault("data","")
 	createTime   := ctx.PostValueDefault("time",time.Now().Format("2006-01-02 15:04:05"))
 
