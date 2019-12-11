@@ -3,7 +3,7 @@ package notice
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
-	"asyncMessageSystem/app/producer"
+	producer2 "asyncMessageSystem/app/controller/producer"
 	"context"
 	"encoding/json"
 	"github.com/Braveheart7854/rabbitmqPool"
@@ -20,12 +20,12 @@ func before(reponse *ProducerResponse, errs error) {
 		err := debug.Stack()
 		log.Println(msg, "["+string(err)+"]")
 		if !config.Debug {
-			reponse = &ProducerResponse{Code:10001,Msg:"System is busy now!",Data:[]byte{}}
+			reponse = &ProducerResponse{Code: 10001,Msg:"System is busy now!",Data:[]byte{}}
 			errs = nil
 		} else {
 			strmsg := msg.(string) + "\r\n"
 			bytemsg := []byte(strmsg)
-			reponse = &ProducerResponse{Code:10001,Msg:"System is busy now!",Data:append(bytemsg, err...)}
+			reponse = &ProducerResponse{Code: 10001,Msg:"System is busy now!",Data:append(bytemsg, err...)}
 			errs = nil
 		}
 
@@ -39,11 +39,11 @@ func (P *Producerpc) Notify(ctx context.Context, in *NoticeRequest) (reponse *Pr
 			err := debug.Stack()
 			log.Println(msg, "["+string(err)+"]")
 			if !config.Debug {
-				reponse = &ProducerResponse{Code:common.FAILED,Msg:"System is busy now!",Data:[]byte{}}
+				reponse = &ProducerResponse{Code: common.FAILED,Msg:"System is busy now!",Data:[]byte{}}
 			} else {
 				strmsg := msg.(string) + "\r\n"
 				bytemsg := []byte(strmsg)
-				reponse = &ProducerResponse{Code:common.FAILED,Msg:"System is busy now!",Data:append(bytemsg, err...)}
+				reponse = &ProducerResponse{Code: common.FAILED,Msg:"System is busy now!",Data:append(bytemsg, err...)}
 			}
 		}
 	}()
@@ -56,7 +56,7 @@ func (P *Producerpc) Notify(ctx context.Context, in *NoticeRequest) (reponse *Pr
 		createTime = time.Now().Format("2006-01-02 15:04:05")
 	}
 
-	var noticeData producer.Notice
+	var noticeData producer2.Notice
 	noticeData.Uid = uid
 	noticeData.Type = n_type
 	noticeData.Data = data
@@ -67,7 +67,7 @@ func (P *Producerpc) Notify(ctx context.Context, in *NoticeRequest) (reponse *Pr
 	result := map[string]interface{}{"uid":uid,"type":n_type,"data":data}
 
 	strResult,_ := json.Marshal(result)
-	reponse = &ProducerResponse{Code:common.SUCCESS,Msg:"success",Data:strResult}
+	reponse = &ProducerResponse{Code: common.SUCCESS,Msg:"success",Data:strResult}
 	return
 }
 
@@ -78,11 +78,11 @@ func (P *Producerpc)Read(ctx context.Context, in *NoticeRequest) (reponse *Produ
 			err := debug.Stack()
 			log.Println(msg, "["+string(err)+"]")
 			if !config.Debug {
-				reponse = &ProducerResponse{Code:common.FAILED,Msg:"System is busy now!",Data:[]byte{}}
+				reponse = &ProducerResponse{Code: common.FAILED,Msg:"System is busy now!",Data:[]byte{}}
 			} else {
 				strmsg := msg.(string) + "\r\n"
 				bytemsg := []byte(strmsg)
-				reponse = &ProducerResponse{Code:common.FAILED,Msg:"System is busy now!",Data:append(bytemsg, err...)}
+				reponse = &ProducerResponse{Code: common.FAILED,Msg:"System is busy now!",Data:append(bytemsg, err...)}
 			}
 		}
 	}()
@@ -95,7 +95,7 @@ func (P *Producerpc)Read(ctx context.Context, in *NoticeRequest) (reponse *Produ
 		createTime = time.Now().Format("2006-01-02 15:04:05")
 	}
 
-	var noticeData producer.Notice
+	var noticeData producer2.Notice
 	noticeData.Uid = uid
 	noticeData.Type = n_type
 	noticeData.Data = data
@@ -106,6 +106,6 @@ func (P *Producerpc)Read(ctx context.Context, in *NoticeRequest) (reponse *Produ
 	result := map[string]interface{}{"uid":uid,"type":n_type,"data":data}
 
 	strResult,_ := json.Marshal(result)
-	reponse = &ProducerResponse{Code:common.SUCCESS,Msg:"success",Data:strResult}
+	reponse = &ProducerResponse{Code: common.SUCCESS,Msg:"success",Data:strResult}
 	return
 }

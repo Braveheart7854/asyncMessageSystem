@@ -9,6 +9,7 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"strconv"
+	"time"
 )
 
 var db *sql.DB
@@ -19,7 +20,7 @@ func init()  {
 	common.FailOnError(err,"")
 	db.SetMaxOpenConns(2000)
 	db.SetMaxIdleConns(1000)
-	db.SetConnMaxLifetime(9)
+	db.SetConnMaxLifetime(9*time.Second)
 	db.Ping()
 }
 

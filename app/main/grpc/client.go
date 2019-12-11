@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	pb "asyncMessageSystem/app/producer/grpc"
+	pb "asyncMessageSystem/app/controller/producer/grpc"
 	"google.golang.org/grpc"
 )
 
@@ -26,7 +26,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	log.Println(time.Now())
-	r, err := c.Notify(ctx, &pb.NoticeRequest{Uid:12163,Type:1,Data:"test"})
+	r, err := c.Notify(ctx, &pb.NoticeRequest{Uid: 12163,Type:1,Data:"test"})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

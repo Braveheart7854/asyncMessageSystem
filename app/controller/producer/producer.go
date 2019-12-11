@@ -34,16 +34,6 @@ type ReturnJson struct {
 }
 
 func (P *Produce) Notify(ctx iris.Context)  {
-	//common.Log("./log3.txt","test")
-
-	//defer func() {
-	//	msg := recover()
-	//	if msg != nil {
-	//		log.Printf("%s",msg)
-	//		ctx.JSON(ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
-	//		return
-	//	}
-	//}()
 
 	uid    := ctx.PostValueInt64Default("uid",0)
 	n_type := ctx.PostValueInt64Default("type",0)
@@ -66,15 +56,6 @@ func (P *Produce) Notify(ctx iris.Context)  {
 }
 
 func (P *Produce) Read(ctx iris.Context) {
-	//defer func() {
-	//	msg := recover()
-	//	if msg != nil {
-	//		log.Printf("%s",msg)
-	//		ctx.JSON(ReturnJson{Code:10001,Msg:"System is busy now!",Data: map[string]interface{}{}})
-	//		return
-	//	}
-	//}()
-
 	uid    := ctx.PostValueInt64Default("uid",0)
 	n_type := ctx.PostValueInt64Default("type",common.TYPE_LIKE)
 	data   := ctx.PostValueDefault("data","")

@@ -10,6 +10,7 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"strconv"
+	"time"
 )
 
 var dbr *sql.DB
@@ -20,7 +21,7 @@ func init()  {
 	common.FailOnError(err,"")
 	dbr.SetMaxOpenConns(2000)
 	dbr.SetMaxIdleConns(1000)
-	dbr.SetConnMaxLifetime(9)
+	dbr.SetConnMaxLifetime(9*time.Second)
 	dbr.Ping()
 }
 

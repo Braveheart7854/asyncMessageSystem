@@ -1,7 +1,8 @@
 package main
 
 import (
-	pb "asyncMessageSystem/app/producer/grpc"
+	pb "asyncMessageSystem/app/controller/producer/grpc"
+	"asyncMessageSystem/app/middleware"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -12,6 +13,8 @@ const (
 )
 
 func main() {
+	middleware.LoadRabbitmq()
+
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
