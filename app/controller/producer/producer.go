@@ -2,8 +2,10 @@ package producer
 
 import (
 	"asyncMessageSystem/app/common"
+	"asyncMessageSystem/app/model"
 	"github.com/Braveheart7854/rabbitmqPool"
 	"github.com/kataras/iris"
+	"strconv"
 	"time"
 )
 
@@ -33,6 +35,9 @@ type ReturnJson struct {
 	Data map[string]interface{} `json:"data"`
 }
 
+/**
+ 新增消息
+ */
 func (P *Produce) Notify(ctx iris.Context)  {
 
 	uid    := ctx.PostValueInt64Default("uid",0)
@@ -55,6 +60,9 @@ func (P *Produce) Notify(ctx iris.Context)  {
 	return
 }
 
+/**
+ 消息标记为已读
+ */
 func (P *Produce) Read(ctx iris.Context) {
 	uid    := ctx.PostValueInt64Default("uid",0)
 	n_type := ctx.PostValueInt64Default("type",common.TYPE_LIKE)
@@ -70,6 +78,21 @@ func (P *Produce) Read(ctx iris.Context) {
 	go rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
 
 	//log.Printf("%d %d %s",uid,n_type,data)
-	ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})
+	_,_ = ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})
+	return
+}
+
+/**
+ 消息列表
+ */
+func (P *Produce) List(ctx iris.Context){
+	uid,_ := strconv.Atoi(ctx.FormValueDefault("uid","0"))
+	typ,_ := strconv.Atoi(ctx.FormValueDefault("type","0"))
+	page,_ := strconv.Atoi(ctx.FormValueDefault("page","1"))
+
+	NoticeModel := new(model.Notice)
+	list := NoticeModel.GetListByUid(uid,typ,page)
+	unread := NoticeModel.CountUnReadByUid(uid,typ)
+	_,_ = ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"list":list,"unread":unread}})
 	return
 }

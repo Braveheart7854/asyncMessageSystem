@@ -3,12 +3,12 @@ package main
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/model"
 	"database/sql"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
-	"strconv"
 	"time"
 )
 
@@ -102,8 +102,9 @@ func main() {
 				continue
 			}
 
-			index := common.GetHaseValue(int(notice["uid"].(float64)))
-			table := "notice_" + strconv.Itoa(index)
+			//index := common.GetHaseValue(int(notice["uid"].(float64)))
+			//table := "notice_" + strconv.Itoa(index)
+			table := new(model.Notice).TableName(notice["uid"].(int))
 
 			var id int
 			_ = db.QueryRow("select id from "+table+" where order_sn = ?", orderSn).Scan(&id)

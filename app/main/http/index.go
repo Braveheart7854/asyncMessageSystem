@@ -7,21 +7,23 @@ import (
 	"github.com/kataras/iris"
 	"net/http"
 	"os"
-	"time"
 )
 
 func main() {
 	app := iris.New()
 	//app.Logger().SetLevel("debug")
 
-	middleware.LoadRabbitmq()
+	middleware.InitDB()
+	middleware.InitMigrate()
+
+	middleware.InitRabbitmq()
 
 	router.Handler(app)
 
 	srv := &http.Server{
-		Addr:config.ServerAddr + ":3333",
-		ReadTimeout: 3 * time.Second,
-		WriteTimeout: 5 * time.Second,
+		Addr:config.ServerAddr,
+		ReadTimeout: config.ReadTimeout,
+		WriteTimeout: config.WriteTimeout,
 	}
 	if err := app.Run(iris.Server(srv)); err != nil{
 		println(err.Error())

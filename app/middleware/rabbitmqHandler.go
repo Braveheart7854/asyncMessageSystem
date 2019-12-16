@@ -5,11 +5,11 @@ import (
 	"github.com/Braveheart7854/rabbitmqPool"
 )
 
-func LoadRabbitmq(){
+func InitRabbitmq(){
 	rabbitmqPool.AmqpServer = rabbitmqPool.Service{
 		AmqpUrl:config.AmqpUrl,
-		ConnectionNum:10,
-		ChannelNum:100,
+		ConnectionNum:config.ConnectionNum,
+		ChannelNum:config.ChannelNum,
 	}
 	rabbitmqPool.InitAmqp()
 }

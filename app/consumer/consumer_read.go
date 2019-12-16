@@ -3,13 +3,13 @@ package main
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/model"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
-	"strconv"
 	"time"
 )
 
@@ -103,8 +103,10 @@ func main() {
 				continue
 			}
 
-			index := common.GetHaseValue(int(read["uid"].(float64)))
-			table := "notice_" + strconv.Itoa(index)
+			//index := common.GetHaseValue(int(read["uid"].(float64)))
+			//table := "notice_" + strconv.Itoa(index)
+			table := new(model.Notice).TableName(read["uid"].(int))
+
 			strType := common.NoticeType(int(read["type"].(float64)))
 
 			rowsql := fmt.Sprintf("update %s set status=1 where uid=? and type in (%s) and status=0",table,strType)
