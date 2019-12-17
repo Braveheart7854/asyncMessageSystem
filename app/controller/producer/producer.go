@@ -23,8 +23,8 @@ type Producer interface {
 //)
 
 type Notice struct {
-	Uid int64 `json:"uid"`
-	Type int64 `json:"type"`
+	Uid  uint64 `json:"uid"`
+	Type int `json:"type"`
 	Data string `json:"data"`
 	CreateTime string `json:"createTime"`
 }
@@ -41,12 +41,12 @@ type ReturnJson struct {
 func (P *Produce) Notify(ctx iris.Context)  {
 
 	uid    := ctx.PostValueInt64Default("uid",0)
-	n_type := ctx.PostValueInt64Default("type",0)
+	n_type := ctx.PostValueIntDefault("type",0)
 	data   := ctx.PostValueDefault("data","")
 	createTime   := ctx.PostValueDefault("time",time.Now().Format("2006-01-02 15:04:05"))
 
 	var noticeData Notice
-	noticeData.Uid = uid
+	noticeData.Uid = uint64(uid)
 	noticeData.Type = n_type
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
@@ -65,12 +65,12 @@ func (P *Produce) Notify(ctx iris.Context)  {
  */
 func (P *Produce) Read(ctx iris.Context) {
 	uid    := ctx.PostValueInt64Default("uid",0)
-	n_type := ctx.PostValueInt64Default("type",common.TYPE_LIKE)
+	n_type := ctx.PostValueIntDefault("type",common.TYPE_LIKE)
 	data   := ctx.PostValueDefault("data","")
 	createTime   := ctx.PostValueDefault("time",time.Now().Format("2006-01-02 15:04:05"))
 
 	var noticeData Notice
-	noticeData.Uid = uid
+	noticeData.Uid = uint64(uid)
 	noticeData.Type = n_type
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
@@ -86,7 +86,7 @@ func (P *Produce) Read(ctx iris.Context) {
  消息列表
  */
 func (P *Produce) List(ctx iris.Context){
-	uid,_ := strconv.Atoi(ctx.FormValueDefault("uid","0"))
+	uid,_ := strconv.ParseUint(ctx.FormValueDefault("uid","0"),10,64)
 	typ,_ := strconv.Atoi(ctx.FormValueDefault("type","0"))
 	page,_ := strconv.Atoi(ctx.FormValueDefault("page","1"))
 

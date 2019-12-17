@@ -1,8 +1,11 @@
 package model
 
 import (
+	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/model/db"
+	"log"
 	"time"
+	"xorm.io/core"
 )
 
 type User struct {
@@ -20,6 +23,30 @@ func (u *User) TableName()string{
 	return "user"
 }
 
+type UserExecPrepare struct {
+	SelectPrepare *core.Stmt
+	InsertPrepare *core.Stmt
+	UpdatePrepare *core.Stmt
+}
+
+var UserPrepare = new(UserExecPrepare)
+
+func (u *User) InitPrepare(){
+	var err error
+	//UserPrepare.SelectPrepare,err = db.DB.DB().Prepare("select id from ? where order_sn = ?")
+	//if err != nil{
+	//	log.Panic(err)
+	//}
+	//UserPrepare.InsertPrepare,err = db.DB.DB().Prepare("insert into ? (order_sn,uid,type,data,create_time) values (?,?,?,?,?)")
+	//if err != nil{
+	//	log.Panic(err)
+	//}
+	UserPrepare.UpdatePrepare,err = db.DB.DB().Prepare("update user set notification_count=notification_count+1 and updated_at=? where id=?")
+	if err != nil{
+		log.Panic(err)
+	}
+}
+
 func (u *User) GetUserInfoByUid(uid uint64)map[string]interface{}{
 	var user = User{Id:uid}
 	has,err := db.DB.Get(&user)
@@ -30,4 +57,20 @@ func (u *User) GetUserInfoByUid(uid uint64)map[string]interface{}{
 		return nil
 	}
 	return map[string]interface{}{"nick":user.Nick,"notification_count":user.NotificationCount}
+}
+
+func (u *User) UpdateUserByUid(uid uint64)(bool,error){
+	timeStr := time.Now().Format(common.LAYOUT_STYLE)
+	result,err := UserPrepare.UpdatePrepare.Exec(timeStr,uid)
+	if err != nil {
+		return false,err
+	}
+	res,e := result.RowsAffected()
+	if e != nil {
+		return false,e
+	}
+	if res > 0{
+		return true,nil
+	}
+	return false,nil
 }

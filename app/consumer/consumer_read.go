@@ -3,6 +3,7 @@ package main
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/model"
 	"database/sql"
 	"encoding/json"
@@ -23,6 +24,8 @@ func init()  {
 	dbr.SetMaxIdleConns(1000)
 	dbr.SetConnMaxLifetime(9*time.Second)
 	dbr.Ping()
+
+	middleware.InitMysql()
 }
 
 func main() {
@@ -82,6 +85,7 @@ func main() {
 	common.FailOnError(err, "Failed to register a consumer")
 
 	forever := make(chan bool)
+	failedQueues := new(model.FailedQueues)
 
 	go func() {
 		for d := range msgs {
@@ -95,7 +99,7 @@ func main() {
 
 			if err != nil{
 				log.Println(err)
-				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
@@ -105,7 +109,7 @@ func main() {
 
 			//index := common.GetHaseValue(int(read["uid"].(float64)))
 			//table := "notice_" + strconv.Itoa(index)
-			table := new(model.Notice).TableName(read["uid"].(int))
+			table := new(model.Notice).TableName(uint64(read["uid"].(float64)))
 
 			strType := common.NoticeType(int(read["type"].(float64)))
 
@@ -113,7 +117,7 @@ func main() {
 			smtp,err := dbr.Prepare(rowsql)
 			if err != nil {
 				log.Println(err)
-				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
@@ -124,7 +128,7 @@ func main() {
 			result,err := smtp.Exec(read["uid"])
 			if err != nil {
 				log.Println(err)
-				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
@@ -135,14 +139,14 @@ func main() {
 			if common.IsEmpty(rowCount) && err != nil {
 
 				log.Println(err)
-				if common.LogErrorJobs(dbr,orderSn,string(d.Body),"read"){
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
 				}
 				continue
 			}else{
-				smtpuserI,err := dbr.Prepare("update users set notification_count=notification_count-? where id=? and notification_count>=?")
+				smtpuserI,err := dbr.Prepare("update user set notification_count=notification_count-? where id=? and notification_count>=?")
 				if err != nil {
 					//log.Println(44444)
 					log.Println(err)
@@ -156,7 +160,7 @@ func main() {
 				smtpuserI.Close()
 
 				if common.IsEmpty(affect) {
-					smtpuser,err := dbr.Prepare("update users set notification_count=0 where id=?")
+					smtpuser,err := dbr.Prepare("update user set notification_count=0 where id=?")
 					if err != nil {
 						//log.Println(22222)
 						log.Println(err)

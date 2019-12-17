@@ -13,9 +13,7 @@ func main() {
 	app := iris.New()
 	//app.Logger().SetLevel("debug")
 
-	middleware.InitDB()
-	middleware.InitMigrate()
-
+	middleware.InitMysql()
 	middleware.InitRabbitmq()
 
 	router.Handler(app)

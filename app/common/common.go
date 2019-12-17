@@ -74,7 +74,7 @@ func MD5(text string) string {
 	return hex.EncodeToString(md.Sum(nil))
 }
 
-func GetHaseValue(uid int)int {
+func GetHaseValue(uid uint64)uint64 {
 	return (uid % 16)+1
 }
 

@@ -10,6 +10,12 @@ import (
 	"time"
 )
 
+func InitMysql(){
+	InitDB()
+	InitMigrate()
+	InitPrepare()
+}
+
 func InitDB(){
 	engine, err := xorm.NewEngine("mysql", config.MysqlDataSource)
 	common.FailOnError(err,"数据库连接池创建失败！")
@@ -24,8 +30,8 @@ func InitDB(){
 
 func InitMigrate(){
 	notice := model.Notice{}
-	for i:=1;i<=16 ;i++  {
-		tablename := notice.TableName(i)
+	for i:=1;i<= model.TableNum ;i++  {
+		tablename := notice.TableName(uint64(i))
 		res,err := db.DB.IsTableExist(tablename)
 		if err !=nil{
 			log.Panic(err.Error())
@@ -43,29 +49,30 @@ func InitMigrate(){
 		}
 	}
 
-	user := model.User{}
-	res,err := db.DB.IsTableExist(user)
-	if err !=nil{
-		log.Panic(err.Error())
-	}
-	if res == false {
-		err = db.DB.Charset("utf8mb4").CreateTable(user)
-		if err != nil {
-			log.Panic(err.Error())
-		}
-		println("Created table ",user.TableName())
-	}
+	createTable(model.User{},new(model.User).TableName())
+	createTable(model.FailedQueues{},new(model.FailedQueues).TableName())
+}
 
-	failedqueues := model.FailedQueues{}
-	res,err = db.DB.IsTableExist(failedqueues)
+func createTable(table interface{},tableName string){
+	res,err := db.DB.IsTableExist(table)
 	if err !=nil{
 		log.Panic(err.Error())
 	}
 	if res == false {
-		err = db.DB.Charset("utf8mb4").CreateTable(failedqueues)
+		err = db.DB.Charset("utf8mb4").CreateTable(table)
 		if err != nil {
 			log.Panic(err.Error())
 		}
-		println("Created table ",failedqueues.TableName())
+		err = db.DB.CreateIndexes(table)
+		if err != nil {
+			log.Panic(err.Error())
+		}
+		println("Created table ",tableName)
 	}
+}
+
+func InitPrepare(){
+	new(model.FailedQueues).InitPrepare()
+	new(model.Notice).InitPrepare()
+	new(model.User).InitPrepare()
 }

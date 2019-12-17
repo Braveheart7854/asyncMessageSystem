@@ -3,25 +3,18 @@ package main
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/controller/producer"
+	"asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/model"
-	"database/sql"
 	"encoding/json"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
-	"time"
 )
 
-var db *sql.DB
-
 func init()  {
-	var err error
-	db, err = sql.Open("mysql", config.MysqlDataSource)
-	common.FailOnError(err,"")
-	db.SetMaxOpenConns(2000)
-	db.SetMaxIdleConns(1000)
-	db.SetConnMaxLifetime(9*time.Second)
-	db.Ping()
+	middleware.InitMysql()
 }
 
 func main() {
@@ -54,20 +47,13 @@ func main() {
 	)
 	common.FailOnError(err, "Failed to declare a queue")
 
-	//if len(os.Args) < 2 {
-	//	log.Printf("Usage: %s [binding_key]...", os.Args[0])
-	//	os.Exit(0)
-	//}
-	//for _, s := range os.Args[1:] {
-	//	log.Printf("Binding queue %s to exchange %s with routing key %s", q.Name, "logs_topic", s)
-		err = ch.QueueBind(
-			q.Name,       // queue name
-			common.RouteKeyNotice,            // routing key
-			common.ExchangeNameNotice, // exchange
-			false,
-			nil)
-		common.FailOnError(err, "Failed to bind a queue")
-	//}
+	err = ch.QueueBind(
+		q.Name,       // queue name
+		common.RouteKeyNotice,            // routing key
+		common.ExchangeNameNotice, // exchange
+		false,
+		nil)
+	common.FailOnError(err, "Failed to bind a queue")
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -81,20 +67,23 @@ func main() {
 	common.FailOnError(err, "Failed to register a consumer")
 
 	forever := make(chan bool)
+	failedQueues := new(model.FailedQueues)
+	noticeModel := new(model.Notice)
+	userModel := new(model.User)
 
 	go func() {
 		for d := range msgs {
 
 			orderSn := common.MD5(string(d.Body)+"notify")
-			//log.Printf(" [x] %s", orderSn)
-			//log.Printf(" [x] %s", d.Body)
 
-			var notice map[string] interface{}
-			err := json.Unmarshal([]byte(d.Body),&notice)
+			var notice = new(producer.Notice)
+			err := json.Unmarshal([]byte(string(d.Body)),notice)
+
+			fmt.Println(notice)
 
 			if err != nil{
-				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
+				log.Println("json.Unmarshal error: ",err.Error())
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"notify"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
@@ -102,55 +91,38 @@ func main() {
 				continue
 			}
 
-			//index := common.GetHaseValue(int(notice["uid"].(float64)))
-			//table := "notice_" + strconv.Itoa(index)
-			table := new(model.Notice).TableName(notice["uid"].(int))
+			table := noticeModel.TableName(notice.Uid)
+			exist,errIsEx := noticeModel.IsExistNotice(table,orderSn)
 
-			var id int
-			_ = db.QueryRow("select id from "+table+" where order_sn = ?", orderSn).Scan(&id)
-			if id > 0 {
+			if errIsEx != nil{
+				log.Println("noticeModel.IsExistNotice error: ",errIsEx.Error())
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"notify"){
+					d.Ack(false)
+				}else{
+					d.Nack(false,true)
+				}
+				continue
+			}
+			if exist {
 				d.Ack(false)
 				continue
 			}
 
-			smtp,err := db.Prepare("insert into "+table+" (order_sn,uid,type,data,create_time) values (?,?,?,?,?)")
-			if err != nil {
-				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
-					d.Ack(false)
-				}else{
-					d.Nack(false,true)
-				}
-				continue
-			}
-			result,err := smtp.Exec(orderSn,notice["uid"],notice["type"],notice["data"],notice["createTime"])
-			if err != nil {
-				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
-					d.Ack(false)
-				}else{
-					d.Nack(false,true)
-				}
-				continue
-			}
-			lastId,err := result.LastInsertId()
-			if common.IsEmpty(lastId) || err != nil {
+			add, adderr := noticeModel.AddNotice(table,orderSn,notice.Uid,notice.Type,notice.Data,notice.CreateTime)
+			if !add || adderr != nil {
+				log.Println("noticeModel.AddNotice error: ",adderr.Error())
 
-				log.Println(err)
-				if common.LogErrorJobs(db,orderSn,string(d.Body),"notify"){
+				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"notify"){
 					d.Ack(false)
 				}else{
 					d.Nack(false,true)
 				}
 				continue
 			}else{
-				smtpuser,_ := db.Prepare("update users set notification_count=notification_count+1 where id=?")
-				res,_ := smtpuser.Exec(notice["uid"])
-				_,_ = res.RowsAffected()
-				smtpuser.Close()
+				_,_ = userModel.UpdateUserByUid(notice.Uid)
 			}
 			d.Ack(false)
-			smtp.Close()
+
 		}
 	}()
 
