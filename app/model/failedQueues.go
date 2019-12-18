@@ -47,7 +47,7 @@ func (f *FailedQueues) InitPrepare(){
 }
 
 func (f *FailedQueues) CountFailedByOrderSn(orderSn string, typ string)(count int){
-	_ = FailedQueuesPrepare.SelectPrepare.QueryRow(orderSn,typ).Scan(count)
+	_ = FailedQueuesPrepare.SelectPrepare.QueryRow(orderSn,typ).Scan(&count)
 	return
 }
 
