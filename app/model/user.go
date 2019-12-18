@@ -26,7 +26,9 @@ func (u *User) TableName()string{
 type UserExecPrepare struct {
 	SelectPrepare *core.Stmt
 	InsertPrepare *core.Stmt
-	UpdatePrepare *core.Stmt
+	IncryNotifyCountPrepare *core.Stmt
+	DecryNotifyCountPrepare *core.Stmt
+	ClearNotifyCountPrepare *core.Stmt
 }
 
 var UserPrepare = new(UserExecPrepare)
@@ -41,7 +43,15 @@ func (u *User) InitPrepare(){
 	//if err != nil{
 	//	log.Panic(err)
 	//}
-	UserPrepare.UpdatePrepare,err = db.DB.DB().Prepare("update user set notification_count=notification_count+1 and updated_at=? where id=?")
+	UserPrepare.IncryNotifyCountPrepare,err = db.DB.DB().Prepare("update user set notification_count=notification_count+1 , updated_at=? where id=?")
+	if err != nil{
+		log.Panic(err)
+	}
+	UserPrepare.DecryNotifyCountPrepare,err = db.DB.DB().Prepare("update user set notification_count=notification_count-? , updated_at=? where id=? and notification_count>=?")
+	if err != nil{
+		log.Panic(err)
+	}
+	UserPrepare.ClearNotifyCountPrepare,err = db.DB.DB().Prepare("update user set notification_count=0, updated_at=? where id=?")
 	if err != nil{
 		log.Panic(err)
 	}
@@ -59,18 +69,41 @@ func (u *User) GetUserInfoByUid(uid uint64)map[string]interface{}{
 	return map[string]interface{}{"nick":user.Nick,"notification_count":user.NotificationCount}
 }
 
-func (u *User) UpdateUserByUid(uid uint64)(bool,error){
+func (u *User) IncryNotifyCount(uid uint64)(int64,error){
 	timeStr := time.Now().Format(common.LAYOUT_STYLE)
-	result,err := UserPrepare.UpdatePrepare.Exec(timeStr,uid)
+	result,err := UserPrepare.IncryNotifyCountPrepare.Exec(timeStr,uid)
 	if err != nil {
-		return false,err
+		return 0,err
 	}
 	res,e := result.RowsAffected()
 	if e != nil {
-		return false,e
+		return 0,e
 	}
-	if res > 0{
-		return true,nil
+	return res,nil
+}
+
+func (u *User) DecryNotifyCount(uid uint64,count int64)(int64,error){
+	timeStr := time.Now().Format(common.LAYOUT_STYLE)
+	result,err := UserPrepare.DecryNotifyCountPrepare.Exec(count,timeStr,uid,count)
+	if err != nil {
+		return 0,err
 	}
-	return false,nil
+	res,e := result.RowsAffected()
+	if e != nil {
+		return 0,e
+	}
+	return res,nil
+}
+
+func (u *User) ClearNotifyCount(uid uint64)(int64,error){
+	timeStr := time.Now().Format(common.LAYOUT_STYLE)
+	result,err := UserPrepare.ClearNotifyCountPrepare.Exec(timeStr,uid)
+	if err != nil {
+		return 0,err
+	}
+	res,e := result.RowsAffected()
+	if e != nil {
+		return 0,e
+	}
+	return res,nil
 }

@@ -54,7 +54,7 @@ func (n *Notice) InitPrepare(){
 		if err != nil{
 			log.Panic(err)
 		}
-		updatePre,err := db.DB.DB().Prepare("update "+tableName+" set status=1 and updated_at=? where uid=? and type in (?) and status=0")
+		updatePre,err := db.DB.DB().Prepare("update "+tableName+" set status=1 , updated_at=? where uid=? and type=? and status=0")
 		if err != nil{
 			log.Panic(err)
 		}
@@ -130,4 +130,16 @@ func (n *Notice) AddNotice(table string,orderSn string,uid uint64,typ int,data s
 		return true,nil
 	}
 	return false,nil
+}
+
+func (n *Notice) UpdateNotice(table string,uid uint64,typ int)(int64,error){
+	result,err := NoticePrepare[table].UpdatePrepare.Exec(time.Now().Format(common.LAYOUT_STYLE),uid,typ)
+	if err != nil {
+		return 0,err
+	}
+	res,e := result.RowsAffected()
+	if e != nil {
+		return 0,e
+	}
+	return res,nil
 }

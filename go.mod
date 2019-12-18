@@ -57,6 +57,7 @@ require (
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/ryanuber/columnize v2.1.0+incompatible // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190710185942-9d28bd7c0945 // indirect

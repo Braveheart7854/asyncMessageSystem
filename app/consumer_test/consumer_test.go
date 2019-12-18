@@ -29,3 +29,28 @@ func TestCount(t *testing.T) {
 		}
 	}
 }
+
+func update(table string,uid uint64,typ int)(int64,error){
+	middleware.InitMysql()
+	noticeModel := new(model.Notice)
+	res,err := noticeModel.UpdateNotice(table,uid,typ)
+	return res,err
+}
+
+func TestUpdate(t *testing.T) {
+	// 这里定义一个临时的结构体来存储测试case的参数以及期望的返回值
+	for _, unit := range []struct {
+		table      string
+		uid        uint64
+		typ        int
+		expected   int64
+		err        error
+	}{
+		{"th_notice_4",3,1, 1,nil},
+	} {
+		// 调用排列组合函数，与期望的结果比对，如果不一致输出错误
+		if actually,err := update(unit.table, unit.uid,unit.typ); actually != unit.expected || err!=nil {
+			t.Errorf("combination: [%v], actually: [%v,%v]", unit, actually,err)
+		}
+	}
+}

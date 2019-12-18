@@ -40,7 +40,7 @@ func (f *FailedQueues) InitPrepare(){
 	if err != nil{
 		log.Panic(err)
 	}
-	FailedQueuesPrepare.UpdatePrepare,err = db.DB.DB().Prepare("update failed_queues set failed_count=failed_count+1 and updated_at=? where order_sn=? and type = ?")
+	FailedQueuesPrepare.UpdatePrepare,err = db.DB.DB().Prepare("update failed_queues set failed_count=failed_count+1 , updated_at=? where order_sn=? and type = ?")
 	if err != nil{
 		log.Panic(err)
 	}

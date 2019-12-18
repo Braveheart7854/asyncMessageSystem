@@ -7,7 +7,6 @@ import (
 	"asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/model"
 	"encoding/json"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
@@ -79,7 +78,7 @@ func main() {
 			var notice = new(producer.Notice)
 			err := json.Unmarshal([]byte(string(d.Body)),notice)
 
-			fmt.Println(notice)
+			//fmt.Println(notice)
 
 			if err != nil{
 				log.Println("json.Unmarshal error: ",err.Error())
@@ -119,7 +118,7 @@ func main() {
 				}
 				continue
 			}else{
-				_,_ = userModel.UpdateUserByUid(notice.Uid)
+				_,_ = userModel.IncryNotifyCount(notice.Uid)
 			}
 			d.Ack(false)
 

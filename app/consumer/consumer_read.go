@@ -3,28 +3,16 @@ package main
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/controller/producer"
 	"asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/model"
-	"database/sql"
 	"encoding/json"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
-	"time"
 )
 
-var dbr *sql.DB
-
 func init()  {
-	var err error
-	dbr, err = sql.Open("mysql", config.MysqlDataSource)
-	common.FailOnError(err,"")
-	dbr.SetMaxOpenConns(2000)
-	dbr.SetMaxIdleConns(1000)
-	dbr.SetConnMaxLifetime(9*time.Second)
-	dbr.Ping()
-
 	middleware.InitMysql()
 }
 
@@ -58,12 +46,6 @@ func main() {
 	)
 	common.FailOnError(err, "Failed to declare a queue")
 
-	//if len(os.Args) < 2 {
-	//	log.Printf("Usage: %s [binding_key]...", os.Args[0])
-	//	os.Exit(0)
-	//}
-	//for _, s := range os.Args[1:] {
-	//	log.Printf("Binding queue %s to exchange %s with routing key %s", q.Name, "logs_topic", s)
 	err = ch.QueueBind(
 		q.Name,       // queue name
 		common.RouteKeyRead,            // routing key
@@ -71,7 +53,6 @@ func main() {
 		false,
 		nil)
 	common.FailOnError(err, "Failed to bind a queue")
-	//}
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -86,16 +67,16 @@ func main() {
 
 	forever := make(chan bool)
 	failedQueues := new(model.FailedQueues)
+	noticeModel := new(model.Notice)
+	userModel := new(model.User)
 
 	go func() {
 		for d := range msgs {
 
 			orderSn := common.MD5(string(d.Body) + "read")
-			//log.Printf(" [x] %s", orderSn)
-			//log.Printf(" [x] %s", d.Body)
 
-			var read map[string] interface{}
-			err := json.Unmarshal([]byte(d.Body),&read)
+			var read = new(producer.Notice)
+			err := json.Unmarshal([]byte(string(d.Body)),read)
 
 			if err != nil{
 				log.Println(err)
@@ -107,16 +88,11 @@ func main() {
 				continue
 			}
 
-			//index := common.GetHaseValue(int(read["uid"].(float64)))
-			//table := "notice_" + strconv.Itoa(index)
-			table := new(model.Notice).TableName(uint64(read["uid"].(float64)))
+			table := new(model.Notice).TableName(read.Uid)
 
-			strType := common.NoticeType(int(read["type"].(float64)))
-
-			rowsql := fmt.Sprintf("update %s set status=1 where uid=? and type in (%s) and status=0",table,strType)
-			smtp,err := dbr.Prepare(rowsql)
-			if err != nil {
-				log.Println(err)
+			rowsCount,errUpdate := noticeModel.UpdateNotice(table,read.Uid,read.Type)
+			if errUpdate != nil{
+				log.Println("noticeModel.UpdateNotice error: ",errUpdate.Error())
 				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
@@ -124,57 +100,19 @@ func main() {
 				}
 				continue
 			}
-
-			result,err := smtp.Exec(read["uid"])
-			if err != nil {
-				log.Println(err)
-				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
-					d.Ack(false)
-				}else{
-					d.Nack(false,true)
+			if rowsCount > 0 {
+				decryCount,decryErr := userModel.DecryNotifyCount(read.Uid,rowsCount)
+				if decryErr != nil {
+					log.Println("userModel.DecryNotifyCount error: ",decryErr.Error())
 				}
-				continue
-			}
-			rowCount,err := result.RowsAffected()
-			if common.IsEmpty(rowCount) && err != nil {
-
-				log.Println(err)
-				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
-					d.Ack(false)
-				}else{
-					d.Nack(false,true)
-				}
-				continue
-			}else{
-				smtpuserI,err := dbr.Prepare("update user set notification_count=notification_count-? where id=? and notification_count>=?")
-				if err != nil {
-					//log.Println(44444)
-					log.Println(err)
-				}
-				res,err := smtpuserI.Exec(rowCount,read["uid"],rowCount)
-				if err != nil {
-					//log.Println(11111)
-					log.Println(err)
-				}
-				affect,_ := res.RowsAffected()
-				smtpuserI.Close()
-
-				if common.IsEmpty(affect) {
-					smtpuser,err := dbr.Prepare("update user set notification_count=0 where id=?")
-					if err != nil {
-						//log.Println(22222)
-						log.Println(err)
+				if decryCount == 0{
+					_,clearErr := userModel.ClearNotifyCount(read.Uid)
+					if clearErr != nil {
+						log.Println("userModel.ClearNotifyCount error: ",clearErr.Error())
 					}
-					_,err = smtpuser.Exec(read["uid"])
-					if err != nil {
-						//log.Println(33333)
-						log.Println(err)
-					}
-					smtpuser.Close()
 				}
 			}
 			d.Ack(false)
-			smtp.Close()
 		}
 	}()
 
