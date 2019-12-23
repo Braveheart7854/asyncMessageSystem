@@ -1,13 +1,13 @@
 package consumer_test
 
 import (
-	"asyncMessageSystem/app/middleware"
+	_ "asyncMessageSystem/app/middleware/mysql"
 	"asyncMessageSystem/app/model"
 	"testing"
 )
 
 func count(orderSn string, typ string)int{
-	middleware.InitMysql()
+	//middleware.InitMysql()
 	failedQueues := new(model.FailedQueues)
 	count := failedQueues.CountFailedByOrderSn(orderSn,typ)
 	return count
@@ -31,7 +31,7 @@ func TestCount(t *testing.T) {
 }
 
 func update(table string,uid uint64,typ int)(int64,error){
-	middleware.InitMysql()
+	//middleware.InitMysql()
 	noticeModel := new(model.Notice)
 	res,err := noticeModel.UpdateNotice(table,uid,typ)
 	return res,err

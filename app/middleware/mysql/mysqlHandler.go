@@ -1,4 +1,4 @@
-package middleware
+package mysql
 
 import (
 	"asyncMessageSystem/app/common"
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func InitMysql(){
+func init(){
 	InitDB()
 	InitMigrate()
 	InitPrepare()

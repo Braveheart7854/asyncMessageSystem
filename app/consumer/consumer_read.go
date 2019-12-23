@@ -4,17 +4,13 @@ import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
 	"asyncMessageSystem/app/controller/producer"
-	"asyncMessageSystem/app/middleware"
+	_ "asyncMessageSystem/app/middleware/mysql"
 	"asyncMessageSystem/app/model"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/streadway/amqp"
 	"log"
 )
-
-func init()  {
-	middleware.InitMysql()
-}
 
 func main() {
 	conn, err := amqp.Dial(config.AmqpUrl)

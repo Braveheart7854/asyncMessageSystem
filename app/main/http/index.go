@@ -2,7 +2,9 @@ package main
 
 import (
 	"asyncMessageSystem/app/config"
-	"asyncMessageSystem/app/middleware"
+	_ "asyncMessageSystem/app/middleware/mysql"
+	_ "asyncMessageSystem/app/middleware/rabbitmq"
+	//_ "asyncMessageSystem/app/middleware/redis"
 	"asyncMessageSystem/app/router"
 	"github.com/kataras/iris"
 	"net/http"
@@ -10,11 +12,9 @@ import (
 )
 
 func main() {
+
 	app := iris.New()
 	//app.Logger().SetLevel("debug")
-
-	middleware.InitMysql()
-	middleware.InitRabbitmq()
 
 	router.Handler(app)
 

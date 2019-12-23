@@ -18,7 +18,7 @@ const (
     TimeZone        = "Asia/Shanghai"
 
 	//测试机
-	//MysqlDataSource = "root:xC6ch6I4u0X3h@tcp(127.0.0.1:3306)/wx_forum" +
+	//MysqlDataSource = "root:xC6ch6I4u0X3h@tcp(127.0.0.1:3306)/message" +
 	//		"?timeout=3s&collation=utf8mb4_unicode_ci&readTimeout=5s&writeTimeout=5s"
 
 
@@ -27,4 +27,6 @@ const (
 	ChannelNum    = 100
 
 	OssDomain = "http://image.com"
+
+
 	)
