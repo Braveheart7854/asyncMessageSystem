@@ -1,0 +1,32 @@
+web:
+  debug: true
+  server_addr: 0.0.0.0:3335
+  read_timeout: 3
+  write_timeout: 5
+  idle_timeout: 8
+xorm:
+  debug: true
+  db_type: mysql
+  max_lifetime: 7200
+  max_open_conns: 2000
+  max_idle_conns: 1000
+  timezone: Asia/Shanghai
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user_name: root
+  password: xC6ch6I4u0X3h
+  db_name: message
+  parameters: timeout=3s&collation=utf8mb4_unicode_ci&readTimeout=5s&writeTimeout=5s
+rabbitMq:
+  host: localhost
+  port: 5672
+  user_name: guest
+  password: guest
+  connection_num: 10
+  channel_num: 100
+redis:
+  host: localhost
+  port: 6379
+  password:
+  database: 0

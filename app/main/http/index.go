@@ -1,12 +1,11 @@
 package main
 
 import (
-	"asyncMessageSystem/app/config"
-	_ "asyncMessageSystem/app/middleware/mysql"
-	_ "asyncMessageSystem/app/middleware/rabbitmq"
-	//_ "asyncMessageSystem/app/middleware/redis"
+	."asyncMessageSystem/app/config"
+	_ "asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/router"
 	"github.com/kataras/iris"
+	"log"
 	"net/http"
 	"os"
 )
@@ -19,12 +18,12 @@ func main() {
 	router.Handler(app)
 
 	srv := &http.Server{
-		Addr:config.ServerAddr,
-		ReadTimeout: config.ReadTimeout,
-		WriteTimeout: config.WriteTimeout,
+		Addr:Conf.Web.ServerAddr,
+		ReadTimeout: Conf.Web.ReadTimeout,
+		WriteTimeout: Conf.Web.WriteTimeout,
 	}
 	if err := app.Run(iris.Server(srv)); err != nil{
-		println(err.Error())
+		log.Println(err.Error())
 		os.Exit(0)
 	}
 }

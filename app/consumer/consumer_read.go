@@ -4,7 +4,7 @@ import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
 	"asyncMessageSystem/app/controller/producer"
-	_ "asyncMessageSystem/app/middleware/mysql"
+	"asyncMessageSystem/app/middleware/mysql"
 	"asyncMessageSystem/app/model"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
@@ -13,7 +13,9 @@ import (
 )
 
 func main() {
-	conn, err := amqp.Dial(config.AmqpUrl)
+	mysql.Init()
+
+	conn, err := amqp.Dial(config.Conf.RabbitMq.Dsn)
 	common.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

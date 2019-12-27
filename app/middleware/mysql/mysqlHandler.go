@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"asyncMessageSystem/app/common"
-	"asyncMessageSystem/app/config"
+	."asyncMessageSystem/app/config"
 	"asyncMessageSystem/app/model"
 	"asyncMessageSystem/app/model/db"
 	"github.com/go-xorm/xorm"
@@ -10,20 +10,21 @@ import (
 	"time"
 )
 
-func init(){
+//func init(){
+func Init(){
 	InitDB()
 	InitMigrate()
 	InitPrepare()
 }
 
 func InitDB(){
-	engine, err := xorm.NewEngine("mysql", config.MysqlDataSource)
+	engine, err := xorm.NewEngine("mysql", Conf.Mysql.Dsn)
 	common.FailOnError(err,"数据库连接池创建失败！")
-	engine.SetMaxOpenConns(config.MaxOpenConns)
-	engine.SetMaxIdleConns(config.MaxIdleConns)
-	engine.SetConnMaxLifetime(config.ConnMaxLifetime)
+	engine.SetMaxOpenConns(Conf.Xorm.MaxOpenConns)
+	engine.SetMaxIdleConns(Conf.Xorm.MaxIdleConns)
+	engine.SetConnMaxLifetime(Conf.Xorm.ConnMaxLifetime)
 
-	engine.TZLocation, _ = time.LoadLocation(config.TimeZone)
+	engine.TZLocation, _ = time.LoadLocation(Conf.Xorm.TimeZone)
 	engine.ShowSQL(true) //调试用
 	db.DB = engine
 }

@@ -1,4 +1,4 @@
-package middleware
+package web
 
 import (
 	"asyncMessageSystem/app/config"
@@ -14,7 +14,7 @@ func PanicHandler(ctx iris.Context) {
 		if msg != nil {
 			err := debug.Stack()
 			log.Println(msg, "["+string(err)+"]")
-			if !config.Debug {
+			if !config.Conf.Web.Debug {
 				ctx.JSON(producer.ReturnJson{Code: 10001, Msg: "System is busy now!", Data: map[string]interface{}{}})
 				return
 			}else{

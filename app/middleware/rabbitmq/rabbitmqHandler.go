@@ -1,15 +1,16 @@
 package rabbitmq
 
 import (
-	"asyncMessageSystem/app/config"
+	."asyncMessageSystem/app/config"
 	"github.com/Braveheart7854/rabbitmqPool"
 )
 
-func init(){
+//func init(){
+func Init(){
 	rabbitmqPool.AmqpServer = rabbitmqPool.Service{
-		AmqpUrl:config.AmqpUrl,
-		ConnectionNum:config.ConnectionNum,
-		ChannelNum:config.ChannelNum,
+		AmqpUrl:Conf.RabbitMq.Dsn,
+		ConnectionNum:Conf.RabbitMq.ConnectionNum,
+		ChannelNum:Conf.RabbitMq.ChannelNum,
 	}
 	rabbitmqPool.InitAmqp()
 }

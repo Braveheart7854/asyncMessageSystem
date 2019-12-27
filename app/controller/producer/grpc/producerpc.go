@@ -19,7 +19,7 @@ func before(reponse *ProducerResponse, errs error) {
 	if msg != nil {
 		err := debug.Stack()
 		log.Println(msg, "["+string(err)+"]")
-		if !config.Debug {
+		if !config.Conf.Web.Debug {
 			reponse = &ProducerResponse{Code: 10001,Msg:"System is busy now!",Data:[]byte{}}
 			errs = nil
 		} else {
@@ -38,7 +38,7 @@ func (P *Producerpc) Notify(ctx context.Context, in *NoticeRequest) (reponse *Pr
 		if msg != nil {
 			err := debug.Stack()
 			log.Println(msg, "["+string(err)+"]")
-			if !config.Debug {
+			if !config.Conf.Web.Debug {
 				reponse = &ProducerResponse{Code: common.FAILED,Msg:"System is busy now!",Data:[]byte{}}
 			} else {
 				strmsg := msg.(string) + "\r\n"
@@ -77,7 +77,7 @@ func (P *Producerpc)Read(ctx context.Context, in *NoticeRequest) (reponse *Produ
 		if msg != nil {
 			err := debug.Stack()
 			log.Println(msg, "["+string(err)+"]")
-			if !config.Debug {
+			if !config.Conf.Web.Debug {
 				reponse = &ProducerResponse{Code: common.FAILED,Msg:"System is busy now!",Data:[]byte{}}
 			} else {
 				strmsg := msg.(string) + "\r\n"

@@ -1,17 +1,20 @@
 package redis
 
 import (
+	."asyncMessageSystem/app/config"
 	"github.com/gomodule/redigo/redis"
 	"log"
+	"strconv"
 )
 
 var Cache = new(Instance)
 
-func init(){
+//func init(){
+func Init(){
 	var err error
-	password := redis.DialPassword("")
-	database := redis.DialDatabase(1)
-	Cache.Conn,err = redis.Dial("tcp","127.0.0.1:6379",password,database)
+	password := redis.DialPassword(Conf.Redis.Password)
+	database := redis.DialDatabase(Conf.Redis.Database)
+	Cache.Conn,err = redis.Dial("tcp",Conf.Redis.Host+":"+ strconv.Itoa(Conf.Redis.Port) ,password,database)
 	if err != nil {
 		log.Panic(err.Error())
 	}
