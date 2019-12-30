@@ -83,9 +83,9 @@ func init(){
 	}
 	Conf.Web.Debug = v.GetBool("web.debug")
 	Conf.Web.ServerAddr = v.GetString("web.server_addr")
-	Conf.Web.ReadTimeout = v.GetDuration("web.read_timeout")
-	Conf.Web.WriteTimeout = v.GetDuration("web.write_timeout")
-	Conf.Web.IdleTimeout = v.GetDuration("web.idle_timeout")
+	Conf.Web.ReadTimeout = v.GetDuration("web.read_timeout") * time.Second
+	Conf.Web.WriteTimeout = v.GetDuration("web.write_timeout") * time.Second
+	Conf.Web.IdleTimeout = v.GetDuration("web.idle_timeout") * time.Second
 
 	Conf.Mysql.Host = v.GetString("mysql.host")
 	Conf.Mysql.Port = v.GetInt("mysql.port")
@@ -97,7 +97,7 @@ func init(){
 
 	Conf.Xorm.Debug = v.GetBool("xorm.debug")
 	Conf.Xorm.DbType = v.GetString("xorm.db_type")
-	Conf.Xorm.ConnMaxLifetime = v.GetDuration("xorm.max_lifetime")
+	Conf.Xorm.ConnMaxLifetime = v.GetDuration("xorm.max_lifetime") * time.Second
 	Conf.Xorm.MaxOpenConns = v.GetInt("xorm.max_open_conns")
 	Conf.Xorm.MaxIdleConns = v.GetInt("xorm.max_idle_conns")
 	Conf.Xorm.TimeZone = v.GetString("Xorm.timezone")
