@@ -57,8 +57,8 @@ func (P *Producerpc) Notify(ctx context.Context, in *NoticeRequest) (reponse *Pr
 	}
 
 	var noticeData producer2.Notice
-	noticeData.Uid = uid
-	noticeData.Type = n_type
+	noticeData.Uid = uint64(uid)
+	noticeData.Type = int(n_type)
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
 
@@ -96,8 +96,8 @@ func (P *Producerpc)Read(ctx context.Context, in *NoticeRequest) (reponse *Produ
 	}
 
 	var noticeData producer2.Notice
-	noticeData.Uid = uid
-	noticeData.Type = n_type
+	noticeData.Uid = uint64(uid)
+	noticeData.Type = int(n_type)
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
 
