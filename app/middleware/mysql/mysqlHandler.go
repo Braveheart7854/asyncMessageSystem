@@ -25,7 +25,7 @@ func InitDB(){
 	engine.SetConnMaxLifetime(Conf.Xorm.ConnMaxLifetime)
 
 	engine.TZLocation, _ = time.LoadLocation(Conf.Xorm.TimeZone)
-	engine.ShowSQL(true) //调试用
+	engine.ShowSQL(Conf.Xorm.Debug) //调试用
 	db.DB = engine
 }
 

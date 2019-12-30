@@ -21,6 +21,7 @@ func main() {
 		Addr:Conf.Web.ServerAddr,
 		ReadTimeout: Conf.Web.ReadTimeout,
 		WriteTimeout: Conf.Web.WriteTimeout,
+		IdleTimeout: Conf.Web.IdleTimeout,
 	}
 	if err := app.Run(iris.Server(srv)); err != nil{
 		log.Println(err.Error())
