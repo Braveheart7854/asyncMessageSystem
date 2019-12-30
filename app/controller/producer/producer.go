@@ -3,6 +3,7 @@ package producer
 import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/model"
+	"encoding/json"
 	"github.com/Braveheart7854/rabbitmqPool"
 	"github.com/kataras/iris"
 	"strconv"
@@ -39,7 +40,6 @@ type ReturnJson struct {
  新增消息
  */
 func (P *Produce) Notify(ctx iris.Context)  {
-
 	uid    := ctx.PostValueInt64Default("uid",0)
 	n_type := ctx.PostValueIntDefault("type",0)
 	data   := ctx.PostValueDefault("data","")
@@ -52,7 +52,14 @@ func (P *Produce) Notify(ctx iris.Context)  {
 	noticeData.CreateTime = createTime
 
 	//common.Log("./log1.txt",data)
-	go rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
+	go func() {
+		msg,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
+		if err != nil {
+			info := map[string]interface{}{"msg":msg,"error":err.Error()}
+			strInfo,_ := json.Marshal(info)
+			common.Log("./notice_retry.log",string(strInfo))
+		}
+	}()
 	//common.Log("./log2.txt",data)
 
 	//log.Printf("%d %d %s",uid,n_type,data)
@@ -75,7 +82,14 @@ func (P *Produce) Read(ctx iris.Context) {
 	noticeData.Data = data
 	noticeData.CreateTime = createTime
 
-	go rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
+	go func() {
+		msg,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
+		if err != nil {
+			info := map[string]interface{}{"msg":msg,"error":err.Error()}
+			strInfo,_ := json.Marshal(info)
+			common.Log("./read_retry.log",string(strInfo))
+		}
+	}()
 
 	//log.Printf("%d %d %s",uid,n_type,data)
 	_,_ = ctx.JSON(ReturnJson{Code:10000,Msg:"success",Data: map[string]interface{}{"uid":uid,"type":n_type,"data":data}})

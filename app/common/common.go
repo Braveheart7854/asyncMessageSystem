@@ -136,12 +136,12 @@ func Log(file string,content string){
 	//写入文件
 	file6, _ := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0766);
 
-	loger := log.New(file6, "前缀", log.Ldate|log.Ltime|log.Lshortfile)
+	loger := log.New(file6, "", log.Ldate|log.Ltime|log.Llongfile)
 
 	//SetFlags设置输出选项
-	loger.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	loger.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
 	//设置输出前缀
-	loger.SetPrefix("test_")
+	//loger.SetPrefix("test_")
 
 	loger.Output(2, content)
 
