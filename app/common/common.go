@@ -14,17 +14,17 @@ import (
 
 
 const (
-	ExchangeNameNotice = "exchange_wxforum_notice"
-	RouteKeyNotice     = "route_wxforum_notice"
-	QueueNameNotice    = "queue_wxforum_notice"
+	ExchangeNameNotice = "exchange_msg_notice"
+	RouteKeyNotice     = "route_msg_notice"
+	QueueNameNotice    = "queue_msg_notice"
 
-	ExchangeNameRead = "exchange_wxforum_read"
-	RouteKeyRead     = "route_wxforum_read"
-	QueueNameRead    = "queue_wxforum_read"
+	ExchangeNameRead = "exchange_msg_read"
+	RouteKeyRead     = "route_msg_read"
+	QueueNameRead    = "queue_msg_read"
 
-	ExchangeNameQuizzesEvent = "exchange_wxforum_quizzes_event"
-	RouteKeyQuizzesEvent     = "route_wxforum_quizzes_event"
-	QueueNameQuizzesEvent    = "queue_wxforum_quizzes_event"
+	ExchangeNameQuizzesEvent = "exchange_msg_quizzes_event"
+	RouteKeyQuizzesEvent     = "route_msg_quizzes_event"
+	QueueNameQuizzesEvent    = "queue_msg_quizzes_event"
 
 	TypeTopicLiked   = 1
 	TypeReplyLiked   = 2
