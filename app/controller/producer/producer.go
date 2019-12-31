@@ -2,6 +2,7 @@ package producer
 
 import (
 	"asyncMessageSystem/app/common"
+	"asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/model"
 	"encoding/json"
 	"github.com/Braveheart7854/rabbitmqPool"
@@ -57,7 +58,8 @@ func (P *Produce) Notify(ctx iris.Context)  {
 		if err != nil {
 			info := map[string]interface{}{"msg":msg,"error":err.Error()}
 			strInfo,_ := json.Marshal(info)
-			common.Log("./notice_retry.log",string(strInfo))
+			//common.Log("./notice_retry.log",string(strInfo))
+			log.NotifyLogger.Info(string(strInfo))
 		}
 	}()
 	//common.Log("./log2.txt",data)
@@ -87,7 +89,8 @@ func (P *Produce) Read(ctx iris.Context) {
 		if err != nil {
 			info := map[string]interface{}{"msg":msg,"error":err.Error()}
 			strInfo,_ := json.Marshal(info)
-			common.Log("./read_retry.log",string(strInfo))
+			//common.Log("./read_retry.log",string(strInfo))
+			log.ReadLogger.Info(string(strInfo))
 		}
 	}()
 

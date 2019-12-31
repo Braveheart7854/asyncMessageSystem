@@ -9,6 +9,7 @@ replace (
 	golang.org/x/image => github.com/golang/image v0.0.0-20190703141733-d6a02ce849c9
 	golang.org/x/lint => github.com/golang/lint v0.0.0-20190409202823-959b441ac422
 	golang.org/x/mobile => github.com/golang/mobile v0.0.0-20190711165009-e47acb2ca7f9
+	golang.org/x/mod => github.com/golang/mod v0.1.0
 	golang.org/x/net => github.com/golang/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/oauth2 => github.com/golang/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sync => github.com/golang/sync v0.0.0-20190423024810-112230192c58
@@ -54,6 +55,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/pkg/errors v0.8.1
@@ -70,6 +72,7 @@ require (
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
+	go.uber.org/zap v1.13.0
 	google.golang.org/grpc v1.21.1
 	xorm.io/core v0.7.2-0.20190928055935-90aeac8d08eb
 
