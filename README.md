@@ -27,7 +27,7 @@ Async message system , is based of iris (golang) and rabbitmq
       运行 ./consumer_read
       
 ## 接口 
-（详见https://github.com/Braveheart7854/asyncMessageSystem/wiki）
+（详见 https://github.com/Braveheart7854/asyncMessageSystem/wiki ）
 - 通知消息接收api
 -     /api/msg/product
 - 通知消息标记为已读api
