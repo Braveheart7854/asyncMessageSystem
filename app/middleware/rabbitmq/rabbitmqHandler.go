@@ -1,7 +1,7 @@
 package rabbitmq
 
 import (
-	."asyncMessageSystem/app/config"
+	. "asyncMessageSystem/app/config"
 	"github.com/Braveheart7854/rabbitmqPool"
 )
 

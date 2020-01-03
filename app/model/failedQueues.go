@@ -2,6 +2,7 @@ package model
 
 import (
 	"asyncMessageSystem/app/common"
+	log2 "asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/model/db"
 	"log"
 	"time"
@@ -89,13 +90,15 @@ func (f *FailedQueues) LogErrorJobs(orderSn string,data string,typ string)(flag 
 	}else if failCount >= 1 && failCount < 5 {
 		_,err := f.UpdateByOrderSn(orderSn,typ)
 		if err != nil {
-			log.Println("LogErrorJobs UpdateByOrderSn error: ",err.Error())
+			//log.Println("LogErrorJobs UpdateByOrderSn error: ",err.Error())
+			log2.MainLogger.Error(err.Error())
 		}
 		flag = false
 	}else {
 		_,err := f.InsertOrder(orderSn,data,typ)
 		if err != nil {
-			log.Println("LogErrorJobs InsertOrder error: ",err.Error())
+			//log.Println("LogErrorJobs InsertOrder error: ",err.Error())
+			log2.MainLogger.Error(err.Error())
 		}
 		flag = false
 	}

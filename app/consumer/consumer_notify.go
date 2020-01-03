@@ -1,8 +1,9 @@
 package main
 
 import (
-	"asyncMessageSystem/app/common"
+	log2 "asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/controller/producer"
 	"asyncMessageSystem/app/middleware/mysql"
 	"asyncMessageSystem/app/model"
@@ -79,7 +80,8 @@ func main() {
 			//fmt.Println(notice)
 
 			if err != nil{
-				log.Println("json.Unmarshal error: ",err.Error())
+				//log.Println("json.Unmarshal error: ",err.Error())
+				log2.MainLogger.Error(err.Error())
 				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"notify"){
 					d.Ack(false)
 				}else{
@@ -92,7 +94,8 @@ func main() {
 			exist,errIsEx := noticeModel.IsExistNotice(table,orderSn)
 
 			if errIsEx != nil{
-				log.Println("noticeModel.IsExistNotice error: ",errIsEx.Error())
+				//log.Println("noticeModel.IsExistNotice error: ",errIsEx.Error())
+				log2.MainLogger.Error(errIsEx.Error())
 				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"notify"){
 					d.Ack(false)
 				}else{
@@ -107,8 +110,10 @@ func main() {
 
 			add, adderr := noticeModel.AddNotice(table,orderSn,notice.Uid,notice.Type,notice.Data,notice.CreateTime)
 			if !add || adderr != nil {
-				log.Println("noticeModel.AddNotice error: ",adderr.Error())
-
+				if adderr != nil {
+					//log.Println("noticeModel.AddNotice error: ",adderr.Error())
+					log2.MainLogger.Error(adderr.Error())
+				}
 				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"notify"){
 					d.Ack(false)
 				}else{

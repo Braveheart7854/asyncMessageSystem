@@ -1,6 +1,7 @@
 package common
 
 import (
+	log2 "asyncMessageSystem/app/middleware/log"
 	"crypto/md5"
 	"database/sql"
 	"encoding/hex"
@@ -63,7 +64,8 @@ func IsEmpty(a interface{}) bool {
 
 func FailOnError(err error, msg string) {
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		//log.Panicf("%s: %s", msg, err)
+		log2.MainLogger.Panic(fmt.Sprintf("%s: %s", msg, err.Error()))
 	}
 }
 

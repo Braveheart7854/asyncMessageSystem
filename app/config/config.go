@@ -1,9 +1,9 @@
 package config
 
 import (
+	log2 "asyncMessageSystem/app/middleware/log"
 	"fmt"
 	"github.com/spf13/viper"
-	"log"
 	"path/filepath"
 	"time"
 )
@@ -78,7 +78,8 @@ func init(){
 	v.SetConfigFile(path+"/app/config/config.yaml")
 	v.SetConfigType("yaml")
 	if err1 := v.ReadInConfig(); err1 != nil {
-		log.Panic(err1.Error())
+		//log.Panic(err1.Error())
+		log2.MainLogger.Panic(err1.Error())
 		return
 	}
 	Conf.Web.Debug = v.GetBool("web.debug")

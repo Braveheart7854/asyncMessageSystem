@@ -5,16 +5,28 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 var MainLogger *zap.Logger
 var NotifyLogger *zap.Logger
 var ReadLogger *zap.Logger
 
-func Init(){
-	MainLogger   = NewLogger("./logs/main.log",zap.InfoLevel,100,30,30,false,"Main")
+func init(){
+	MainLogger   = NewLogger("./logs/"+GetLogName()+".log",zap.InfoLevel,100,30,30,false,GetLogName())
 	NotifyLogger = NewLogger("./logs/notice_retry.log",zap.InfoLevel,100,30,30,true,"Notify")
 	ReadLogger   = NewLogger("./logs/read_retry.log",zap.InfoLevel,100,30,30,true,"Read")
+}
+
+func GetLogName()(name string){
+	args := strings.Split(os.Args[0],"/")
+	name = args[len(args)-1]
+	if name == "" {
+		name = "main_" + strconv.Itoa(time.Now().Second())
+	}
+	return
 }
 
 func NewLogger(filePath string, level zapcore.Level, maxSize int, maxBackups int, maxAge int, compress bool, serviceName string) *zap.Logger {

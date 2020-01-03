@@ -3,10 +3,10 @@ package mysql
 import (
 	"asyncMessageSystem/app/common"
 	."asyncMessageSystem/app/config"
+	"asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/model"
 	"asyncMessageSystem/app/model/db"
 	"github.com/go-xorm/xorm"
-	"log"
 	"time"
 )
 
@@ -35,18 +35,18 @@ func InitMigrate(){
 		tablename := notice.TableName(uint64(i))
 		res,err := db.DB.IsTableExist(tablename)
 		if err !=nil{
-			log.Panic(err.Error())
+			log.MainLogger.Panic(err.Error())
 		}
 		if res == false {
 			err = db.DB.Charset("utf8mb4").Table(tablename).CreateTable(notice)
 			if err != nil {
-				log.Panic(err.Error())
+				log.MainLogger.Panic(err.Error())
 			}
 			err = db.DB.Table(tablename).CreateIndexes(notice)
 			if err != nil {
-				log.Panic(err.Error())
+				log.MainLogger.Panic(err.Error())
 			}
-			println("Created table ",tablename)
+			log.MainLogger.Info("Created table "+tablename)
 		}
 	}
 
@@ -57,16 +57,16 @@ func InitMigrate(){
 func createTable(table interface{},tableName string){
 	res,err := db.DB.IsTableExist(table)
 	if err !=nil{
-		log.Panic(err.Error())
+		log.MainLogger.Panic(err.Error())
 	}
 	if res == false {
 		err = db.DB.Charset("utf8mb4").CreateTable(table)
 		if err != nil {
-			log.Panic(err.Error())
+			log.MainLogger.Panic(err.Error())
 		}
 		err = db.DB.CreateIndexes(table)
 		if err != nil {
-			log.Panic(err.Error())
+			log.MainLogger.Panic(err.Error())
 		}
 		println("Created table ",tableName)
 	}

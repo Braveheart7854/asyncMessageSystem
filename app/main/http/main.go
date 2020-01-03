@@ -1,11 +1,12 @@
 package main
 
 import (
+	"asyncMessageSystem/app/middleware/log"
 	."asyncMessageSystem/app/config"
 	_ "asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/router"
 	"github.com/kataras/iris"
-	"log"
+
 	"net/http"
 	"os"
 )
@@ -24,7 +25,7 @@ func main() {
 		IdleTimeout: Conf.Web.IdleTimeout,
 	}
 	if err := app.Run(iris.Server(srv)); err != nil{
-		log.Println(err.Error())
+		log.MainLogger.Error(err.Error())
 		os.Exit(0)
 	}
 }

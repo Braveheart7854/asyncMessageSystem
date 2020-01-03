@@ -4,6 +4,7 @@ import (
 	"asyncMessageSystem/app/common"
 	"asyncMessageSystem/app/config"
 	"asyncMessageSystem/app/controller/producer"
+	log2 "asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/middleware/mysql"
 	"asyncMessageSystem/app/model"
 	"encoding/json"
@@ -77,7 +78,8 @@ func main() {
 			err := json.Unmarshal([]byte(string(d.Body)),read)
 
 			if err != nil{
-				log.Println(err)
+				//log.Println(err)
+				log2.MainLogger.Error(err.Error())
 				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
@@ -90,7 +92,8 @@ func main() {
 
 			rowsCount,errUpdate := noticeModel.UpdateNotice(table,read.Uid,read.Type)
 			if errUpdate != nil{
-				log.Println("noticeModel.UpdateNotice error: ",errUpdate.Error())
+				//log.Println("noticeModel.UpdateNotice error: ",errUpdate.Error())
+				log2.MainLogger.Error(errUpdate.Error())
 				if failedQueues.LogErrorJobs(orderSn,string(d.Body),"read"){
 					d.Ack(false)
 				}else{
@@ -101,12 +104,14 @@ func main() {
 			if rowsCount > 0 {
 				decryCount,decryErr := userModel.DecryNotifyCount(read.Uid,rowsCount)
 				if decryErr != nil {
-					log.Println("userModel.DecryNotifyCount error: ",decryErr.Error())
+					//log.Println("userModel.DecryNotifyCount error: ",decryErr.Error())
+					log2.MainLogger.Error(decryErr.Error())
 				}
 				if decryCount == 0{
 					_,clearErr := userModel.ClearNotifyCount(read.Uid)
 					if clearErr != nil {
-						log.Println("userModel.ClearNotifyCount error: ",clearErr.Error())
+						//log.Println("userModel.ClearNotifyCount error: ",clearErr.Error())
+						log2.MainLogger.Error(clearErr.Error())
 					}
 				}
 			}
