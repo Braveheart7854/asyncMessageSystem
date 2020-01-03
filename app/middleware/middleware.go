@@ -4,14 +4,13 @@ import (
 	"asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/middleware/mysql"
 	"asyncMessageSystem/app/middleware/rabbitmq"
-	"asyncMessageSystem/app/middleware/redis"
 	"runtime/debug"
 )
 
 var RequireMiddleware = map[string]func(){
 	"mysql"    : mysql.Init,
 	"rabbitmq" : rabbitmq.Init,
-	"redis"    : redis.Init,
+	//"redis"    : redis.Init,
 }
 
 func init(){
