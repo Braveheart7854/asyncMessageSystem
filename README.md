@@ -1,7 +1,9 @@
 # asyncMessageSystem
 Async message system , is based of iris (golang) and rabbitmq
 
-异步消息处理系统，支持高并发
+异步消息处理系统，支持高并发。
+
+集成了http、grpc、mvc、中间件模块、yaml配置文件加载、系统日志等功能。
 
 ## 实现的功能
 - 通知消息的接收、处理、展示
