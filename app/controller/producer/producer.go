@@ -54,9 +54,9 @@ func (P *Produce) Notify(ctx iris.Context)  {
 
 	//common.Log("./log1.txt",data)
 	go func() {
-		msg,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
+		_,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameNotice,common.RouteKeyNotice,noticeData)
 		if err != nil {
-			info := map[string]interface{}{"msg":msg,"error":err.Error()}
+			info := map[string]interface{}{"msg":noticeData,"error":err.Error()}
 			strInfo,_ := json.Marshal(info)
 			//common.Log("./notice_retry.log",string(strInfo))
 			log.NotifyLogger.Info(string(strInfo))
@@ -85,9 +85,9 @@ func (P *Produce) Read(ctx iris.Context) {
 	noticeData.CreateTime = createTime
 
 	go func() {
-		msg,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
+		_,err := rabbitmqPool.AmqpServer.PutIntoQueue(common.ExchangeNameRead,common.RouteKeyRead,noticeData)
 		if err != nil {
-			info := map[string]interface{}{"msg":msg,"error":err.Error()}
+			info := map[string]interface{}{"msg":noticeData,"error":err.Error()}
 			strInfo,_ := json.Marshal(info)
 			//common.Log("./read_retry.log",string(strInfo))
 			log.ReadLogger.Info(string(strInfo))
