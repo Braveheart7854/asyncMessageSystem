@@ -19,12 +19,12 @@ mysql:
   db_name: message
   parameters: timeout=3s&collation=utf8mb4_unicode_ci&readTimeout=5s&writeTimeout=5s
 rabbitMq:
-  host: localhost
+  host: 121.199.6.172
   port: 5672
   user_name: guest
   password: guest
-  connection_num: 10
-  channel_num: 100
+  connection_num: 1
+  channel_num: 5
 redis:
   host: localhost
   port: 6379

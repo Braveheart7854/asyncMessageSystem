@@ -105,6 +105,7 @@ func main() {
 			}
 			if exist {
 				d.Ack(false)
+				log2.MainLogger.Info("exist "+orderSn+" "+string(d.Body))
 				continue
 			}
 

@@ -2,6 +2,7 @@ package rabbitmq
 
 import (
 	. "asyncMessageSystem/app/config"
+	//"asyncMessageSystem/app/middleware/rabbitmqPool"
 	"github.com/Braveheart7854/rabbitmqPool"
 )
 

@@ -6,6 +6,7 @@ import (
 	"asyncMessageSystem/app/model"
 	"encoding/json"
 	"github.com/Braveheart7854/rabbitmqPool"
+	//"asyncMessageSystem/app/middleware/rabbitmqPool"
 	"github.com/kataras/iris"
 	"strconv"
 	"time"
