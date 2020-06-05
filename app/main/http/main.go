@@ -5,24 +5,20 @@ import (
 	_ "asyncMessageSystem/app/middleware"
 	"asyncMessageSystem/app/middleware/log"
 	"asyncMessageSystem/app/router"
-	"fmt"
 	"github.com/kataras/iris"
-	"runtime"
-	"time"
-
 	"net/http"
 	"os"
 )
 
 func main() {
-	go func() {
-		for true {
-			select {
-			case <-time.After(500*time.Millisecond):
-				fmt.Println("NumGoroutine : ",runtime.NumGoroutine())
-			}
-		}
-	}()
+	//go func() {
+	//	for true {
+	//		select {
+	//		case <-time.After(500*time.Millisecond):
+	//			fmt.Println("NumGoroutine : ",runtime.NumGoroutine())
+	//		}
+	//	}
+	//}()
 
 	app := iris.New()
 	//app.Logger().SetLevel("debug")
