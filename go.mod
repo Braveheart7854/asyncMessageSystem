@@ -24,7 +24,7 @@ replace (
 )
 
 require (
-	github.com/Braveheart7854/rabbitmqPool v1.1.1
+	github.com/Braveheart7854/rabbitmqPool v1.1.2
 	github.com/Joker/jade v1.0.0 // indirect
 	github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398 // indirect
 	github.com/ajg/form v1.5.1 // indirect
@@ -58,13 +58,12 @@ require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/ryanuber/columnize v2.1.0+incompatible // indirect
-	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/spf13/viper v1.6.1
-	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
+	github.com/streadway/amqp v1.0.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0 // indirect
@@ -74,6 +73,7 @@ require (
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	go.uber.org/zap v1.13.0
 	google.golang.org/grpc v1.21.1
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	xorm.io/core v0.7.2-0.20190928055935-90aeac8d08eb
 
 )
